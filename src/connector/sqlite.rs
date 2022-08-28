@@ -133,7 +133,9 @@ impl TryFrom<&str> for Sqlite {
         let params = SqliteParams::try_from(path)?;
         let file_path = params.file_path;
 
-        let conn = rusqlite::Connection::open(file_path.as_str())?;
+        let conn =
+            if file_path.ends_with(":memory:") {rusqlite::Connection::open_in_memory()?}
+            else {rusqlite::Connection::open(file_path)?};
 
         if let Some(timeout) = params.socket_timeout {
             conn.busy_timeout(timeout)?;
